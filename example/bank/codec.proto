@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package chain_schema.example.bank;
+
+option go_package = "bank";
+
+import "example/codec.proto";
+import "chain_schema.proto";
+//import "google/api/annotations.proto";
+
+message Asset {
+    bytes asset = 1;
+    bytes amount = 2;
+}
+
+message SendRequest {
+    bytes from = 1;
+    bytes to = 2;
+    repeated Asset assets = 3;
+}
+
+message BurnRequest {
+    bytes from = 1;
+    repeated Asset assets = 2;
+}
+
+message GetBalanceRequest {
+    bytes address = 1;
+    bytes asset = 2;
+}
+
+message GetBalanceResponse {
+    bytes balance = 1;
+}
+
+message GetSupplyRequest {
+    bytes asset = 1;
+}
+
+message GetSupplyResponse {
+    bytes supply = 1;
+    bytes burned = 2;
+}
+
+service Bank {
+    rpc Send (SendRequest) returns (Empty);
+    rpc Burn (BurnRequest) returns (Empty);
+    rpc GetBalance (GetBalanceRequest) returns (GetBalanceResponse) {
+//        option (google.api.http) = {
+//          get: "/bank/balance"
+//          body: "*"
+//        };
+    };
+    rpc GetSupply (GetSupplyRequest) returns (GetSupplyResponse);
+}
+
+message AssetMetadata {
+    bytes asset = 1;
+    bytes authority = 2;
+    bytes module = 3;
+    string name = 4;
+    bytes metadata = 5;
+    option (chain_schema.primary_key) = "asset";
+}
+
+message AssetSupply {
+    bytes asset = 1;
+    bytes liquid_supply = 2;
+    bytes burned_supply = 3;
+    option (chain_schema.primary_key) = "asset";
+}
+
+message AssetHolding {
+    bytes address = 1;
+    bytes asset = 2;
+    bytes holding = 3;
+    option (chain_schema.primary_key) = "address";
+    option (chain_schema.primary_key) = "asset";
+}

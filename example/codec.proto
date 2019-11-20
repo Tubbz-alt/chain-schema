@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package chain_schema.example;
+option go_package = "example";
+
+message Empty { }
+
+message Integer {
+    bytes value = 1;
+}
+
+message Decimal {
+    int32 scale = 1;
+    Integer integer = 2;
+}
+

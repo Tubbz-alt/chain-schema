@@ -1,0 +1,3 @@
+protogen:
+	prototool generate
+

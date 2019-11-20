@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package chain_schema.example.account;
+
+option go_package = "account";
+
+//import "gogoproto/gogo.proto";
+
+message Account {
+    bytes address = 1;
+//    bytes address = 1 [(gogoproto.casttype) = "github.com/regen-network/chain-schema.example.Address"];
+    PubKey pubkey = 2;
+    bytes metadata = 3;
+//    bytes metadata = 3 [(gogoproto.casttype) = "github.com/regen-network/chain-schema.example.data.HashURI"];
+}
+
+message PubKey {
+    oneof sum {
+        bytes secp256k1 = 1;
+        bytes ed25519 = 2;
+        bytes secp256r1 = 3;
+        bytes cosmos_multisig = 4;
+    }
+}

@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package chain_schema;
+
 enum PrimitiveType {
     BOOL = 0;
     INT3 = 1;
@@ -24,23 +26,23 @@ enum PrimitiveType {
 message TypeRef {
     oneof info {
         PrimitiveType primitive = 1;
-        uint64 complex_type = 2;
+        int64 defined_type = 2;
         TypeRef array = 3;
         TypeRef optional = 4;
         // TODO handle formats like addresses, dates, geo, other binary encodings compression, etc. checkout multicodec
     }
 }
 
-message ComplexType {
-    uint64 namespace = 1;
+message TypeDefinition {
+    int64 namespace = 1;
     string name = 2;
+    bool experimental = 3;
 
     oneof info {
-        Struct struct = 3;
-        Enum enum = 4;
-        Interface interface = 5;
+        Struct struct = 4;
+        Enum enum = 5;
+        Interface interface = 6;
     }
-
 }
 
 message Struct {
@@ -50,15 +52,16 @@ message Struct {
 message Field {
     string name = 1;
     TypeRef type = 2;
+    uint32 proto_field = 3;
 }
 
 message Enum {
-    repeated Value values = 3;
+    repeated EnumValue values = 3;
 }
 
-message Value {
+message EnumValue {
     string name = 1;
-    sint32 value = 2;
+    int32 value = 2;
 }
 
 message Interface {
@@ -78,7 +81,62 @@ enum MethodType {
 }
 
 message Table {
-    TypeRef type = 1;
+    string name = 1;
+    TypeRef type = 2;
+    repeated string primary_key = 3;
+
    // primary key
    // indexes
+    message IndexPartExpression {
+        oneof term {
+            string column = 1;
+            FnCall fncall = 2;
+        }
+
+        message FnCall {
+            uint64 fn = 1;
+            repeated FnArg args = 2;
+        }
+
+        message FnArg {
+            string name = 1;
+            IndexPartExpression value = 2;
+        }
+    }
 }
+
+message ModuleDef {
+    repeated TypeDefinition typedefs = 1;
+    repeated Method methods = 2;
+    repeated Table tables = 3;
+}
+
+import "google/protobuf/descriptor.proto";
+
+message Index {
+    oneof term {
+        string column = 1;
+        FnCall fncall = 2;
+    }
+
+    message FnCall {
+        uint64 fn = 1;
+        repeated FnArg args = 2;
+    }
+
+    message FnArg {
+        string name = 1;
+        Index value = 2;
+    }
+}
+
+extend google.protobuf.MessageOptions {
+    bool runtime_interface = 64501;
+    repeated string primary_key = 64502;
+    repeated Index index = 64503;
+}
+
+message AnInterface {
+    option(runtime_interface) = true;
+}
+

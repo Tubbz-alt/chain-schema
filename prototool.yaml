@@ -1,0 +1,27 @@
+protoc:
+  version: 3.8.0
+lint:
+  group: uber2
+  rules:
+    add:
+      - RPCS_NO_STREAMING
+
+
+generate:
+  go_options:
+    import_path: github.com/regen-network/chain-schema
+
+    extra_modifiers:
+      google/api/annotations.proto: google.golang.org/genproto/googleapis/api/annotations
+      google/api/http.proto: google.golang.org/genproto/googleapis/api/annotations
+
+
+  plugins:
+    - name: gogoslick
+      type: gogo
+      output: .
+      flags: plugins=grpc
+    - name: grpc-gateway
+      type: go
+      output: .
+

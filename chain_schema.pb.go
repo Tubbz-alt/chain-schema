@@ -6,6 +6,7 @@ package chain_schema
 import (
 	fmt "fmt"
 	proto "github.com/gogo/protobuf/proto"
+	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -121,7 +122,7 @@ func (MethodType) EnumDescriptor() ([]byte, []int) {
 type TypeRef struct {
 	// Types that are valid to be assigned to Info:
 	//	*TypeRef_Primitive
-	//	*TypeRef_ComplexType
+	//	*TypeRef_DefinedType
 	//	*TypeRef_Array
 	//	*TypeRef_Optional
 	Info isTypeRef_Info `protobuf_oneof:"info"`
@@ -167,10 +168,10 @@ type isTypeRef_Info interface {
 }
 
 type TypeRef_Primitive struct {
-	Primitive PrimitiveType `protobuf:"varint,1,opt,name=primitive,proto3,enum=PrimitiveType,oneof" json:"primitive,omitempty"`
+	Primitive PrimitiveType `protobuf:"varint,1,opt,name=primitive,proto3,enum=chain_schema.PrimitiveType,oneof" json:"primitive,omitempty"`
 }
-type TypeRef_ComplexType struct {
-	ComplexType uint64 `protobuf:"varint,2,opt,name=complex_type,json=complexType,proto3,oneof" json:"complex_type,omitempty"`
+type TypeRef_DefinedType struct {
+	DefinedType int64 `protobuf:"varint,2,opt,name=defined_type,json=definedType,proto3,oneof" json:"defined_type,omitempty"`
 }
 type TypeRef_Array struct {
 	Array *TypeRef `protobuf:"bytes,3,opt,name=array,proto3,oneof" json:"array,omitempty"`
@@ -180,7 +181,7 @@ type TypeRef_Optional struct {
 }
 
 func (*TypeRef_Primitive) isTypeRef_Info()   {}
-func (*TypeRef_ComplexType) isTypeRef_Info() {}
+func (*TypeRef_DefinedType) isTypeRef_Info() {}
 func (*TypeRef_Array) isTypeRef_Info()       {}
 func (*TypeRef_Optional) isTypeRef_Info()    {}
 
@@ -198,9 +199,9 @@ func (m *TypeRef) GetPrimitive() PrimitiveType {
 	return BOOL
 }
 
-func (m *TypeRef) GetComplexType() uint64 {
-	if x, ok := m.GetInfo().(*TypeRef_ComplexType); ok {
-		return x.ComplexType
+func (m *TypeRef) GetDefinedType() int64 {
+	if x, ok := m.GetInfo().(*TypeRef_DefinedType); ok {
+		return x.DefinedType
 	}
 	return 0
 }
@@ -223,33 +224,34 @@ func (m *TypeRef) GetOptional() *TypeRef {
 func (*TypeRef) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
 		(*TypeRef_Primitive)(nil),
-		(*TypeRef_ComplexType)(nil),
+		(*TypeRef_DefinedType)(nil),
 		(*TypeRef_Array)(nil),
 		(*TypeRef_Optional)(nil),
 	}
 }
 
-type ComplexType struct {
-	Namespace uint64 `protobuf:"varint,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
-	Name      string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+type TypeDefinition struct {
+	Namespace    int64  `protobuf:"varint,1,opt,name=namespace,proto3" json:"namespace,omitempty"`
+	Name         string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Experimental bool   `protobuf:"varint,3,opt,name=experimental,proto3" json:"experimental,omitempty"`
 	// Types that are valid to be assigned to Info:
-	//	*ComplexType_Struct
-	//	*ComplexType_Enum
-	//	*ComplexType_Interface
-	Info isComplexType_Info `protobuf_oneof:"info"`
+	//	*TypeDefinition_Struct
+	//	*TypeDefinition_Enum
+	//	*TypeDefinition_Interface
+	Info isTypeDefinition_Info `protobuf_oneof:"info"`
 }
 
-func (m *ComplexType) Reset()      { *m = ComplexType{} }
-func (*ComplexType) ProtoMessage() {}
-func (*ComplexType) Descriptor() ([]byte, []int) {
+func (m *TypeDefinition) Reset()      { *m = TypeDefinition{} }
+func (*TypeDefinition) ProtoMessage() {}
+func (*TypeDefinition) Descriptor() ([]byte, []int) {
 	return fileDescriptor_87fbb4634437c5fc, []int{1}
 }
-func (m *ComplexType) XXX_Unmarshal(b []byte) error {
+func (m *TypeDefinition) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ComplexType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *TypeDefinition) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_ComplexType.Marshal(b, m, deterministic)
+		return xxx_messageInfo_TypeDefinition.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -259,87 +261,94 @@ func (m *ComplexType) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) 
 		return b[:n], nil
 	}
 }
-func (m *ComplexType) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ComplexType.Merge(m, src)
+func (m *TypeDefinition) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TypeDefinition.Merge(m, src)
 }
-func (m *ComplexType) XXX_Size() int {
+func (m *TypeDefinition) XXX_Size() int {
 	return m.Size()
 }
-func (m *ComplexType) XXX_DiscardUnknown() {
-	xxx_messageInfo_ComplexType.DiscardUnknown(m)
+func (m *TypeDefinition) XXX_DiscardUnknown() {
+	xxx_messageInfo_TypeDefinition.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ComplexType proto.InternalMessageInfo
+var xxx_messageInfo_TypeDefinition proto.InternalMessageInfo
 
-type isComplexType_Info interface {
-	isComplexType_Info()
+type isTypeDefinition_Info interface {
+	isTypeDefinition_Info()
 	Equal(interface{}) bool
 	MarshalTo([]byte) (int, error)
 	Size() int
 }
 
-type ComplexType_Struct struct {
-	Struct *Struct `protobuf:"bytes,3,opt,name=struct,proto3,oneof" json:"struct,omitempty"`
+type TypeDefinition_Struct struct {
+	Struct *Struct `protobuf:"bytes,4,opt,name=struct,proto3,oneof" json:"struct,omitempty"`
 }
-type ComplexType_Enum struct {
-	Enum *Enum `protobuf:"bytes,4,opt,name=enum,proto3,oneof" json:"enum,omitempty"`
+type TypeDefinition_Enum struct {
+	Enum *Enum `protobuf:"bytes,5,opt,name=enum,proto3,oneof" json:"enum,omitempty"`
 }
-type ComplexType_Interface struct {
-	Interface *Interface `protobuf:"bytes,5,opt,name=interface,proto3,oneof" json:"interface,omitempty"`
+type TypeDefinition_Interface struct {
+	Interface *Interface `protobuf:"bytes,6,opt,name=interface,proto3,oneof" json:"interface,omitempty"`
 }
 
-func (*ComplexType_Struct) isComplexType_Info()    {}
-func (*ComplexType_Enum) isComplexType_Info()      {}
-func (*ComplexType_Interface) isComplexType_Info() {}
+func (*TypeDefinition_Struct) isTypeDefinition_Info()    {}
+func (*TypeDefinition_Enum) isTypeDefinition_Info()      {}
+func (*TypeDefinition_Interface) isTypeDefinition_Info() {}
 
-func (m *ComplexType) GetInfo() isComplexType_Info {
+func (m *TypeDefinition) GetInfo() isTypeDefinition_Info {
 	if m != nil {
 		return m.Info
 	}
 	return nil
 }
 
-func (m *ComplexType) GetNamespace() uint64 {
+func (m *TypeDefinition) GetNamespace() int64 {
 	if m != nil {
 		return m.Namespace
 	}
 	return 0
 }
 
-func (m *ComplexType) GetName() string {
+func (m *TypeDefinition) GetName() string {
 	if m != nil {
 		return m.Name
 	}
 	return ""
 }
 
-func (m *ComplexType) GetStruct() *Struct {
-	if x, ok := m.GetInfo().(*ComplexType_Struct); ok {
+func (m *TypeDefinition) GetExperimental() bool {
+	if m != nil {
+		return m.Experimental
+	}
+	return false
+}
+
+func (m *TypeDefinition) GetStruct() *Struct {
+	if x, ok := m.GetInfo().(*TypeDefinition_Struct); ok {
 		return x.Struct
 	}
 	return nil
 }
 
-func (m *ComplexType) GetEnum() *Enum {
-	if x, ok := m.GetInfo().(*ComplexType_Enum); ok {
+func (m *TypeDefinition) GetEnum() *Enum {
+	if x, ok := m.GetInfo().(*TypeDefinition_Enum); ok {
 		return x.Enum
 	}
 	return nil
 }
 
-func (m *ComplexType) GetInterface() *Interface {
-	if x, ok := m.GetInfo().(*ComplexType_Interface); ok {
+func (m *TypeDefinition) GetInterface() *Interface {
+	if x, ok := m.GetInfo().(*TypeDefinition_Interface); ok {
 		return x.Interface
 	}
 	return nil
 }
 
 // XXX_OneofWrappers is for the internal use of the proto package.
-func (*ComplexType) XXX_OneofWrappers() []interface{} {
+func (*TypeDefinition) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
-		(*ComplexType_Struct)(nil),
-		(*ComplexType_Enum)(nil),
-		(*ComplexType_Interface)(nil),
+		(*TypeDefinition_Struct)(nil),
+		(*TypeDefinition_Enum)(nil),
+		(*TypeDefinition_Interface)(nil),
 	}
 }
 
@@ -387,8 +396,9 @@ func (m *Struct) GetFields() []*Field {
 }
 
 type Field struct {
-	Name string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Type *TypeRef `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Name       string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Type       *TypeRef `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	ProtoField uint32   `protobuf:"varint,3,opt,name=proto_field,json=protoField,proto3" json:"proto_field,omitempty"`
 }
 
 func (m *Field) Reset()      { *m = Field{} }
@@ -437,8 +447,15 @@ func (m *Field) GetType() *TypeRef {
 	return nil
 }
 
+func (m *Field) GetProtoField() uint32 {
+	if m != nil {
+		return m.ProtoField
+	}
+	return 0
+}
+
 type Enum struct {
-	Values []*Value `protobuf:"bytes,3,rep,name=values,proto3" json:"values,omitempty"`
+	Values []*EnumValue `protobuf:"bytes,3,rep,name=values,proto3" json:"values,omitempty"`
 }
 
 func (m *Enum) Reset()      { *m = Enum{} }
@@ -473,29 +490,29 @@ func (m *Enum) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Enum proto.InternalMessageInfo
 
-func (m *Enum) GetValues() []*Value {
+func (m *Enum) GetValues() []*EnumValue {
 	if m != nil {
 		return m.Values
 	}
 	return nil
 }
 
-type Value struct {
+type EnumValue struct {
 	Name  string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Value int32  `protobuf:"zigzag32,2,opt,name=value,proto3" json:"value,omitempty"`
+	Value int32  `protobuf:"varint,2,opt,name=value,proto3" json:"value,omitempty"`
 }
 
-func (m *Value) Reset()      { *m = Value{} }
-func (*Value) ProtoMessage() {}
-func (*Value) Descriptor() ([]byte, []int) {
+func (m *EnumValue) Reset()      { *m = EnumValue{} }
+func (*EnumValue) ProtoMessage() {}
+func (*EnumValue) Descriptor() ([]byte, []int) {
 	return fileDescriptor_87fbb4634437c5fc, []int{5}
 }
-func (m *Value) XXX_Unmarshal(b []byte) error {
+func (m *EnumValue) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *Value) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *EnumValue) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_Value.Marshal(b, m, deterministic)
+		return xxx_messageInfo_EnumValue.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -505,26 +522,26 @@ func (m *Value) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return b[:n], nil
 	}
 }
-func (m *Value) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Value.Merge(m, src)
+func (m *EnumValue) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EnumValue.Merge(m, src)
 }
-func (m *Value) XXX_Size() int {
+func (m *EnumValue) XXX_Size() int {
 	return m.Size()
 }
-func (m *Value) XXX_DiscardUnknown() {
-	xxx_messageInfo_Value.DiscardUnknown(m)
+func (m *EnumValue) XXX_DiscardUnknown() {
+	xxx_messageInfo_EnumValue.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_Value proto.InternalMessageInfo
+var xxx_messageInfo_EnumValue proto.InternalMessageInfo
 
-func (m *Value) GetName() string {
+func (m *EnumValue) GetName() string {
 	if m != nil {
 		return m.Name
 	}
 	return ""
 }
 
-func (m *Value) GetValue() int32 {
+func (m *EnumValue) GetValue() int32 {
 	if m != nil {
 		return m.Value
 	}
@@ -575,7 +592,7 @@ func (m *Interface) GetImplementers() []uint64 {
 }
 
 type Method struct {
-	Type   MethodType `protobuf:"varint,1,opt,name=type,proto3,enum=MethodType" json:"type,omitempty"`
+	Type   MethodType `protobuf:"varint,1,opt,name=type,proto3,enum=chain_schema.MethodType" json:"type,omitempty"`
 	Input  *TypeRef   `protobuf:"bytes,2,opt,name=input,proto3" json:"input,omitempty"`
 	Output *TypeRef   `protobuf:"bytes,3,opt,name=output,proto3" json:"output,omitempty"`
 }
@@ -634,7 +651,9 @@ func (m *Method) GetOutput() *TypeRef {
 }
 
 type Table struct {
-	Type *TypeRef `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Name       string   `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Type       *TypeRef `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	PrimaryKey []string `protobuf:"bytes,3,rep,name=primary_key,json=primaryKey,proto3" json:"primary_key,omitempty"`
 }
 
 func (m *Table) Reset()      { *m = Table{} }
@@ -669,6 +688,13 @@ func (m *Table) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Table proto.InternalMessageInfo
 
+func (m *Table) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
 func (m *Table) GetType() *TypeRef {
 	if m != nil {
 		return m.Type
@@ -676,66 +702,608 @@ func (m *Table) GetType() *TypeRef {
 	return nil
 }
 
+func (m *Table) GetPrimaryKey() []string {
+	if m != nil {
+		return m.PrimaryKey
+	}
+	return nil
+}
+
+// primary key
+// indexes
+type Table_IndexPartExpression struct {
+	// Types that are valid to be assigned to Term:
+	//	*Table_IndexPartExpression_Column
+	//	*Table_IndexPartExpression_Fncall
+	Term isTable_IndexPartExpression_Term `protobuf_oneof:"term"`
+}
+
+func (m *Table_IndexPartExpression) Reset()      { *m = Table_IndexPartExpression{} }
+func (*Table_IndexPartExpression) ProtoMessage() {}
+func (*Table_IndexPartExpression) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87fbb4634437c5fc, []int{8, 0}
+}
+func (m *Table_IndexPartExpression) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Table_IndexPartExpression) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Table_IndexPartExpression.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Table_IndexPartExpression) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Table_IndexPartExpression.Merge(m, src)
+}
+func (m *Table_IndexPartExpression) XXX_Size() int {
+	return m.Size()
+}
+func (m *Table_IndexPartExpression) XXX_DiscardUnknown() {
+	xxx_messageInfo_Table_IndexPartExpression.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Table_IndexPartExpression proto.InternalMessageInfo
+
+type isTable_IndexPartExpression_Term interface {
+	isTable_IndexPartExpression_Term()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type Table_IndexPartExpression_Column struct {
+	Column string `protobuf:"bytes,1,opt,name=column,proto3,oneof" json:"column,omitempty"`
+}
+type Table_IndexPartExpression_Fncall struct {
+	Fncall *Table_IndexPartExpression_FnCall `protobuf:"bytes,2,opt,name=fncall,proto3,oneof" json:"fncall,omitempty"`
+}
+
+func (*Table_IndexPartExpression_Column) isTable_IndexPartExpression_Term() {}
+func (*Table_IndexPartExpression_Fncall) isTable_IndexPartExpression_Term() {}
+
+func (m *Table_IndexPartExpression) GetTerm() isTable_IndexPartExpression_Term {
+	if m != nil {
+		return m.Term
+	}
+	return nil
+}
+
+func (m *Table_IndexPartExpression) GetColumn() string {
+	if x, ok := m.GetTerm().(*Table_IndexPartExpression_Column); ok {
+		return x.Column
+	}
+	return ""
+}
+
+func (m *Table_IndexPartExpression) GetFncall() *Table_IndexPartExpression_FnCall {
+	if x, ok := m.GetTerm().(*Table_IndexPartExpression_Fncall); ok {
+		return x.Fncall
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*Table_IndexPartExpression) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*Table_IndexPartExpression_Column)(nil),
+		(*Table_IndexPartExpression_Fncall)(nil),
+	}
+}
+
+type Table_IndexPartExpression_FnCall struct {
+	Fn   uint64                             `protobuf:"varint,1,opt,name=fn,proto3" json:"fn,omitempty"`
+	Args []*Table_IndexPartExpression_FnArg `protobuf:"bytes,2,rep,name=args,proto3" json:"args,omitempty"`
+}
+
+func (m *Table_IndexPartExpression_FnCall) Reset()      { *m = Table_IndexPartExpression_FnCall{} }
+func (*Table_IndexPartExpression_FnCall) ProtoMessage() {}
+func (*Table_IndexPartExpression_FnCall) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87fbb4634437c5fc, []int{8, 0, 0}
+}
+func (m *Table_IndexPartExpression_FnCall) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Table_IndexPartExpression_FnCall) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Table_IndexPartExpression_FnCall.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Table_IndexPartExpression_FnCall) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Table_IndexPartExpression_FnCall.Merge(m, src)
+}
+func (m *Table_IndexPartExpression_FnCall) XXX_Size() int {
+	return m.Size()
+}
+func (m *Table_IndexPartExpression_FnCall) XXX_DiscardUnknown() {
+	xxx_messageInfo_Table_IndexPartExpression_FnCall.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Table_IndexPartExpression_FnCall proto.InternalMessageInfo
+
+func (m *Table_IndexPartExpression_FnCall) GetFn() uint64 {
+	if m != nil {
+		return m.Fn
+	}
+	return 0
+}
+
+func (m *Table_IndexPartExpression_FnCall) GetArgs() []*Table_IndexPartExpression_FnArg {
+	if m != nil {
+		return m.Args
+	}
+	return nil
+}
+
+type Table_IndexPartExpression_FnArg struct {
+	Name  string                     `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Value *Table_IndexPartExpression `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (m *Table_IndexPartExpression_FnArg) Reset()      { *m = Table_IndexPartExpression_FnArg{} }
+func (*Table_IndexPartExpression_FnArg) ProtoMessage() {}
+func (*Table_IndexPartExpression_FnArg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87fbb4634437c5fc, []int{8, 0, 1}
+}
+func (m *Table_IndexPartExpression_FnArg) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Table_IndexPartExpression_FnArg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Table_IndexPartExpression_FnArg.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Table_IndexPartExpression_FnArg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Table_IndexPartExpression_FnArg.Merge(m, src)
+}
+func (m *Table_IndexPartExpression_FnArg) XXX_Size() int {
+	return m.Size()
+}
+func (m *Table_IndexPartExpression_FnArg) XXX_DiscardUnknown() {
+	xxx_messageInfo_Table_IndexPartExpression_FnArg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Table_IndexPartExpression_FnArg proto.InternalMessageInfo
+
+func (m *Table_IndexPartExpression_FnArg) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Table_IndexPartExpression_FnArg) GetValue() *Table_IndexPartExpression {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+type ModuleDef struct {
+	Typedefs []*TypeDefinition `protobuf:"bytes,1,rep,name=typedefs,proto3" json:"typedefs,omitempty"`
+	Methods  []*Method         `protobuf:"bytes,2,rep,name=methods,proto3" json:"methods,omitempty"`
+	Tables   []*Table          `protobuf:"bytes,3,rep,name=tables,proto3" json:"tables,omitempty"`
+}
+
+func (m *ModuleDef) Reset()      { *m = ModuleDef{} }
+func (*ModuleDef) ProtoMessage() {}
+func (*ModuleDef) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87fbb4634437c5fc, []int{9}
+}
+func (m *ModuleDef) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ModuleDef) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ModuleDef.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ModuleDef) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ModuleDef.Merge(m, src)
+}
+func (m *ModuleDef) XXX_Size() int {
+	return m.Size()
+}
+func (m *ModuleDef) XXX_DiscardUnknown() {
+	xxx_messageInfo_ModuleDef.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ModuleDef proto.InternalMessageInfo
+
+func (m *ModuleDef) GetTypedefs() []*TypeDefinition {
+	if m != nil {
+		return m.Typedefs
+	}
+	return nil
+}
+
+func (m *ModuleDef) GetMethods() []*Method {
+	if m != nil {
+		return m.Methods
+	}
+	return nil
+}
+
+func (m *ModuleDef) GetTables() []*Table {
+	if m != nil {
+		return m.Tables
+	}
+	return nil
+}
+
+type Index struct {
+	// Types that are valid to be assigned to Term:
+	//	*Index_Column
+	//	*Index_Fncall
+	Term isIndex_Term `protobuf_oneof:"term"`
+}
+
+func (m *Index) Reset()      { *m = Index{} }
+func (*Index) ProtoMessage() {}
+func (*Index) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87fbb4634437c5fc, []int{10}
+}
+func (m *Index) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Index) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Index.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Index) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Index.Merge(m, src)
+}
+func (m *Index) XXX_Size() int {
+	return m.Size()
+}
+func (m *Index) XXX_DiscardUnknown() {
+	xxx_messageInfo_Index.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Index proto.InternalMessageInfo
+
+type isIndex_Term interface {
+	isIndex_Term()
+	Equal(interface{}) bool
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type Index_Column struct {
+	Column string `protobuf:"bytes,1,opt,name=column,proto3,oneof" json:"column,omitempty"`
+}
+type Index_Fncall struct {
+	Fncall *Index_FnCall `protobuf:"bytes,2,opt,name=fncall,proto3,oneof" json:"fncall,omitempty"`
+}
+
+func (*Index_Column) isIndex_Term() {}
+func (*Index_Fncall) isIndex_Term() {}
+
+func (m *Index) GetTerm() isIndex_Term {
+	if m != nil {
+		return m.Term
+	}
+	return nil
+}
+
+func (m *Index) GetColumn() string {
+	if x, ok := m.GetTerm().(*Index_Column); ok {
+		return x.Column
+	}
+	return ""
+}
+
+func (m *Index) GetFncall() *Index_FnCall {
+	if x, ok := m.GetTerm().(*Index_Fncall); ok {
+		return x.Fncall
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*Index) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*Index_Column)(nil),
+		(*Index_Fncall)(nil),
+	}
+}
+
+type Index_FnCall struct {
+	Fn   uint64         `protobuf:"varint,1,opt,name=fn,proto3" json:"fn,omitempty"`
+	Args []*Index_FnArg `protobuf:"bytes,2,rep,name=args,proto3" json:"args,omitempty"`
+}
+
+func (m *Index_FnCall) Reset()      { *m = Index_FnCall{} }
+func (*Index_FnCall) ProtoMessage() {}
+func (*Index_FnCall) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87fbb4634437c5fc, []int{10, 0}
+}
+func (m *Index_FnCall) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Index_FnCall) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Index_FnCall.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Index_FnCall) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Index_FnCall.Merge(m, src)
+}
+func (m *Index_FnCall) XXX_Size() int {
+	return m.Size()
+}
+func (m *Index_FnCall) XXX_DiscardUnknown() {
+	xxx_messageInfo_Index_FnCall.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Index_FnCall proto.InternalMessageInfo
+
+func (m *Index_FnCall) GetFn() uint64 {
+	if m != nil {
+		return m.Fn
+	}
+	return 0
+}
+
+func (m *Index_FnCall) GetArgs() []*Index_FnArg {
+	if m != nil {
+		return m.Args
+	}
+	return nil
+}
+
+type Index_FnArg struct {
+	Name  string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Value *Index `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+}
+
+func (m *Index_FnArg) Reset()      { *m = Index_FnArg{} }
+func (*Index_FnArg) ProtoMessage() {}
+func (*Index_FnArg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87fbb4634437c5fc, []int{10, 1}
+}
+func (m *Index_FnArg) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Index_FnArg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Index_FnArg.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Index_FnArg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Index_FnArg.Merge(m, src)
+}
+func (m *Index_FnArg) XXX_Size() int {
+	return m.Size()
+}
+func (m *Index_FnArg) XXX_DiscardUnknown() {
+	xxx_messageInfo_Index_FnArg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Index_FnArg proto.InternalMessageInfo
+
+func (m *Index_FnArg) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Index_FnArg) GetValue() *Index {
+	if m != nil {
+		return m.Value
+	}
+	return nil
+}
+
+type AnInterface struct {
+}
+
+func (m *AnInterface) Reset()      { *m = AnInterface{} }
+func (*AnInterface) ProtoMessage() {}
+func (*AnInterface) Descriptor() ([]byte, []int) {
+	return fileDescriptor_87fbb4634437c5fc, []int{11}
+}
+func (m *AnInterface) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *AnInterface) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_AnInterface.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *AnInterface) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AnInterface.Merge(m, src)
+}
+func (m *AnInterface) XXX_Size() int {
+	return m.Size()
+}
+func (m *AnInterface) XXX_DiscardUnknown() {
+	xxx_messageInfo_AnInterface.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AnInterface proto.InternalMessageInfo
+
+var E_RuntimeInterface = &proto.ExtensionDesc{
+	ExtendedType:  (*descriptor.MessageOptions)(nil),
+	ExtensionType: (*bool)(nil),
+	Field:         64501,
+	Name:          "chain_schema.runtime_interface",
+	Tag:           "varint,64501,opt,name=runtime_interface",
+	Filename:      "chain_schema.proto",
+}
+
+var E_PrimaryKey = &proto.ExtensionDesc{
+	ExtendedType:  (*descriptor.MessageOptions)(nil),
+	ExtensionType: ([]string)(nil),
+	Field:         64502,
+	Name:          "chain_schema.primary_key",
+	Tag:           "bytes,64502,rep,name=primary_key",
+	Filename:      "chain_schema.proto",
+}
+
+var E_Index = &proto.ExtensionDesc{
+	ExtendedType:  (*descriptor.MessageOptions)(nil),
+	ExtensionType: ([]*Index)(nil),
+	Field:         64503,
+	Name:          "chain_schema.index",
+	Tag:           "bytes,64503,rep,name=index",
+	Filename:      "chain_schema.proto",
+}
+
 func init() {
-	proto.RegisterEnum("PrimitiveType", PrimitiveType_name, PrimitiveType_value)
-	proto.RegisterEnum("MethodType", MethodType_name, MethodType_value)
-	proto.RegisterType((*TypeRef)(nil), "TypeRef")
-	proto.RegisterType((*ComplexType)(nil), "ComplexType")
-	proto.RegisterType((*Struct)(nil), "Struct")
-	proto.RegisterType((*Field)(nil), "Field")
-	proto.RegisterType((*Enum)(nil), "Enum")
-	proto.RegisterType((*Value)(nil), "Value")
-	proto.RegisterType((*Interface)(nil), "Interface")
-	proto.RegisterType((*Method)(nil), "Method")
-	proto.RegisterType((*Table)(nil), "Table")
+	proto.RegisterEnum("chain_schema.PrimitiveType", PrimitiveType_name, PrimitiveType_value)
+	proto.RegisterEnum("chain_schema.MethodType", MethodType_name, MethodType_value)
+	proto.RegisterType((*TypeRef)(nil), "chain_schema.TypeRef")
+	proto.RegisterType((*TypeDefinition)(nil), "chain_schema.TypeDefinition")
+	proto.RegisterType((*Struct)(nil), "chain_schema.Struct")
+	proto.RegisterType((*Field)(nil), "chain_schema.Field")
+	proto.RegisterType((*Enum)(nil), "chain_schema.Enum")
+	proto.RegisterType((*EnumValue)(nil), "chain_schema.EnumValue")
+	proto.RegisterType((*Interface)(nil), "chain_schema.Interface")
+	proto.RegisterType((*Method)(nil), "chain_schema.Method")
+	proto.RegisterType((*Table)(nil), "chain_schema.Table")
+	proto.RegisterType((*Table_IndexPartExpression)(nil), "chain_schema.Table.IndexPartExpression")
+	proto.RegisterType((*Table_IndexPartExpression_FnCall)(nil), "chain_schema.Table.IndexPartExpression.FnCall")
+	proto.RegisterType((*Table_IndexPartExpression_FnArg)(nil), "chain_schema.Table.IndexPartExpression.FnArg")
+	proto.RegisterType((*ModuleDef)(nil), "chain_schema.ModuleDef")
+	proto.RegisterType((*Index)(nil), "chain_schema.Index")
+	proto.RegisterType((*Index_FnCall)(nil), "chain_schema.Index.FnCall")
+	proto.RegisterType((*Index_FnArg)(nil), "chain_schema.Index.FnArg")
+	proto.RegisterType((*AnInterface)(nil), "chain_schema.AnInterface")
+	proto.RegisterExtension(E_RuntimeInterface)
+	proto.RegisterExtension(E_PrimaryKey)
+	proto.RegisterExtension(E_Index)
 }
 
 func init() { proto.RegisterFile("chain_schema.proto", fileDescriptor_87fbb4634437c5fc) }
 
 var fileDescriptor_87fbb4634437c5fc = []byte{
-	// 670 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x94, 0x31, 0x4f, 0xdb, 0x4e,
-	0x18, 0xc6, 0x7d, 0x89, 0xed, 0x24, 0xaf, 0x03, 0x1c, 0xa7, 0xff, 0x10, 0xe9, 0x8f, 0xae, 0xa9,
-	0xab, 0xa2, 0x94, 0xc1, 0x55, 0x43, 0x14, 0xa9, 0x63, 0x02, 0x86, 0x58, 0x0a, 0xa1, 0xbd, 0x38,
-	0x08, 0x26, 0x64, 0x82, 0x23, 0xac, 0x26, 0xb6, 0x95, 0x38, 0xa8, 0x6c, 0xfd, 0x08, 0xfd, 0x18,
-	0x1d, 0x2b, 0xf5, 0x4b, 0x74, 0x64, 0x64, 0x2c, 0x66, 0xe9, 0xc8, 0xd6, 0xb5, 0xba, 0xb3, 0xe3,
-	0x40, 0x61, 0x7b, 0x9f, 0xdf, 0xfb, 0xfa, 0x9e, 0xe7, 0xde, 0x9c, 0x02, 0x64, 0x78, 0xe1, 0x78,
-	0xfe, 0xe9, 0x6c, 0x78, 0xe1, 0x4e, 0x1c, 0x23, 0x9c, 0x06, 0x51, 0xa0, 0x7f, 0x47, 0x50, 0xb0,
-	0xaf, 0x42, 0x97, 0xb9, 0x23, 0x62, 0x40, 0x29, 0x9c, 0x7a, 0x13, 0x2f, 0xf2, 0x2e, 0xdd, 0x0a,
-	0xaa, 0xa2, 0xda, 0x6a, 0x7d, 0xd5, 0xf8, 0xb0, 0x20, 0x7c, 0xaa, 0x23, 0xb1, 0xe5, 0x08, 0x79,
-	0x05, 0xe5, 0x61, 0x30, 0x09, 0xc7, 0xee, 0xe7, 0xd3, 0xe8, 0x2a, 0x74, 0x2b, 0xb9, 0x2a, 0xaa,
-	0xc9, 0x1d, 0x89, 0x69, 0x29, 0xe5, 0x5f, 0x90, 0x2a, 0x28, 0xce, 0x74, 0xea, 0x5c, 0x55, 0xf2,
-	0x55, 0x54, 0xd3, 0xea, 0x45, 0x23, 0x75, 0xeb, 0x48, 0x2c, 0x69, 0x90, 0x4d, 0x28, 0x06, 0x61,
-	0xe4, 0x05, 0xbe, 0x33, 0xae, 0xc8, 0x4f, 0x86, 0xb2, 0x5e, 0x5b, 0x05, 0xd9, 0xf3, 0x47, 0x81,
-	0xfe, 0x03, 0x81, 0xb6, 0xf3, 0xc0, 0x61, 0x03, 0x4a, 0xbe, 0x33, 0x71, 0x67, 0xa1, 0x33, 0x4c,
-	0x62, 0xcb, 0x6c, 0x09, 0x08, 0x01, 0x99, 0x0b, 0x11, 0xae, 0xc4, 0x44, 0x4d, 0x5e, 0x82, 0x3a,
-	0x8b, 0xa6, 0xf3, 0x61, 0x94, 0x86, 0x2a, 0x18, 0x7d, 0x21, 0x3b, 0x12, 0x4b, 0x1b, 0xe4, 0x7f,
-	0x90, 0x5d, 0x7f, 0x3e, 0x49, 0x03, 0x29, 0x86, 0xe9, 0xcf, 0x27, 0x1d, 0x89, 0x09, 0x48, 0xb6,
-	0xa0, 0xe4, 0xf9, 0x91, 0x3b, 0x1d, 0x71, 0x47, 0x45, 0x4c, 0x80, 0x61, 0x2d, 0x08, 0x5f, 0x52,
-	0xd6, 0xce, 0x52, 0xd7, 0x40, 0x4d, 0x4c, 0x08, 0x05, 0x75, 0xe4, 0xb9, 0xe3, 0xf3, 0x59, 0x25,
-	0x5f, 0xcd, 0xd7, 0xb4, 0xba, 0x6a, 0xec, 0x71, 0xc9, 0x52, 0xaa, 0xbf, 0x07, 0x45, 0x80, 0x2c,
-	0x3a, 0x7a, 0x10, 0x7d, 0x03, 0xe4, 0x6c, 0xd7, 0x0f, 0x16, 0xc5, 0x04, 0xd5, 0x37, 0x41, 0xe6,
-	0x41, 0xb9, 0xc5, 0xa5, 0x33, 0x9e, 0xbb, 0x4b, 0x8b, 0x23, 0x2e, 0x59, 0x4a, 0xf5, 0x77, 0xa0,
-	0x08, 0xf0, 0xac, 0xc5, 0x7f, 0xa0, 0x88, 0x31, 0xe1, 0xb1, 0xce, 0x12, 0xa1, 0xbf, 0x85, 0x52,
-	0x76, 0x43, 0xa2, 0x43, 0xd9, 0xe3, 0x3f, 0xc0, 0xc4, 0xe5, 0x68, 0x56, 0x41, 0xd5, 0x7c, 0x4d,
-	0x66, 0x8f, 0x98, 0xfe, 0x09, 0xd4, 0x03, 0x37, 0xba, 0x08, 0xce, 0xc9, 0x8b, 0x34, 0x73, 0xf2,
-	0xa4, 0x34, 0x23, 0xc1, 0x22, 0xb9, 0x68, 0x10, 0x0a, 0x8a, 0xe7, 0x87, 0xf3, 0xe8, 0xc9, 0xad,
-	0x12, 0x4c, 0xaa, 0xa0, 0x06, 0xf3, 0x88, 0x0f, 0xfc, 0xf3, 0x88, 0x58, 0xca, 0xf5, 0xd7, 0xa0,
-	0xd8, 0xce, 0xd9, 0x78, 0xb9, 0x1f, 0xf4, 0xdc, 0x7e, 0xb6, 0xfe, 0x20, 0x58, 0x79, 0xf4, 0xa0,
-	0x49, 0x11, 0xe4, 0xf6, 0xe1, 0x61, 0x17, 0x4b, 0xbc, 0xb2, 0x7a, 0xf6, 0x36, 0x46, 0xa4, 0x04,
-	0x8a, 0xd5, 0xb3, 0x9b, 0x0d, 0x9c, 0x23, 0x00, 0xea, 0x80, 0xd3, 0x3a, 0xce, 0x2f, 0xea, 0x66,
-	0x03, 0xcb, 0xbc, 0xee, 0x27, 0x5c, 0x59, 0xd4, 0xcd, 0x06, 0x56, 0x89, 0x06, 0x85, 0x3d, 0xeb,
-	0xd8, 0xdc, 0xdd, 0xae, 0xe3, 0x42, 0x26, 0x9a, 0x0d, 0x5c, 0x24, 0x65, 0x28, 0xf6, 0x17, 0xad,
-	0xd2, 0x52, 0x35, 0x1b, 0x18, 0xc4, 0x09, 0x36, 0xb3, 0x7a, 0xfb, 0x58, 0xe3, 0xe6, 0xed, 0x13,
-	0xdb, 0xec, 0xe3, 0x32, 0x59, 0x03, 0xad, 0x6d, 0xed, 0x9f, 0x5a, 0x3d, 0xdb, 0xdc, 0x37, 0x19,
-	0x5e, 0x59, 0x80, 0x5d, 0x73, 0xc7, 0x3a, 0x68, 0x75, 0xf1, 0x2a, 0x3f, 0x66, 0xb7, 0x65, 0x9b,
-	0xb6, 0x75, 0x60, 0xe2, 0x35, 0xa1, 0x06, 0xac, 0x65, 0x5b, 0x87, 0x3d, 0x8c, 0xb9, 0xe2, 0x5f,
-	0xb2, 0xa3, 0x56, 0x17, 0xaf, 0x6f, 0xbd, 0x01, 0x58, 0xae, 0x9d, 0xa8, 0x90, 0xb3, 0x8f, 0xb1,
-	0xc4, 0xcd, 0x3e, 0x0e, 0x4c, 0x76, 0x82, 0x11, 0xbf, 0xfe, 0xc0, 0xb6, 0xba, 0x38, 0xd7, 0x6e,
-	0x5c, 0xdf, 0x52, 0xe9, 0xe6, 0x96, 0x4a, 0xf7, 0xb7, 0x14, 0x7d, 0x89, 0x29, 0xfa, 0x16, 0x53,
-	0xf4, 0x33, 0xa6, 0xe8, 0x3a, 0xa6, 0xe8, 0x57, 0x4c, 0xd1, 0xef, 0x98, 0x4a, 0xf7, 0x31, 0x45,
-	0x5f, 0xef, 0xa8, 0x74, 0x7d, 0x47, 0xa5, 0x9b, 0x3b, 0x2a, 0x9d, 0xa9, 0xe2, 0xff, 0x64, 0xfb,
-	0x6f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x5e, 0xab, 0x95, 0xbb, 0x65, 0x04, 0x00, 0x00,
+	// 1095 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x4f, 0x53, 0xdb, 0x46,
+	0x14, 0x97, 0x6c, 0x59, 0xd8, 0xcf, 0x84, 0x28, 0x4b, 0x3a, 0x51, 0x69, 0x46, 0xf1, 0xa8, 0x87,
+	0x9a, 0xa4, 0x98, 0x19, 0xe3, 0x90, 0x0e, 0x9d, 0x1e, 0xec, 0x60, 0xb0, 0xa6, 0x60, 0xd2, 0x45,
+	0x64, 0x92, 0xf6, 0xe0, 0x11, 0xf6, 0xda, 0x68, 0xaa, 0x7f, 0x23, 0xc9, 0x19, 0x7c, 0x6b, 0xbf,
+	0x41, 0xa7, 0x1f, 0xa1, 0xd3, 0x43, 0x3e, 0x43, 0x2f, 0xbd, 0xf6, 0xc8, 0xad, 0x39, 0x16, 0x73,
+	0xe9, 0x91, 0x4b, 0xcb, 0xb5, 0xb3, 0x2b, 0x59, 0x46, 0x60, 0x48, 0x0e, 0xbd, 0xed, 0xbe, 0xf7,
+	0x7b, 0x7f, 0x7f, 0x6f, 0x9f, 0x04, 0xa8, 0x7b, 0x64, 0x98, 0x4e, 0x27, 0xe8, 0x1e, 0x11, 0xdb,
+	0xa8, 0x78, 0xbe, 0x1b, 0xba, 0x68, 0xfe, 0xb2, 0x6c, 0xa9, 0x34, 0x70, 0xdd, 0x81, 0x45, 0x56,
+	0x99, 0xee, 0x70, 0xd8, 0x5f, 0xed, 0x91, 0xa0, 0xeb, 0x9b, 0x5e, 0xe8, 0xfa, 0x11, 0x5e, 0xfd,
+	0x93, 0x87, 0x39, 0x7d, 0xe4, 0x11, 0x4c, 0xfa, 0xe8, 0x4b, 0x28, 0x78, 0xbe, 0x69, 0x9b, 0xa1,
+	0xf9, 0x86, 0xc8, 0x7c, 0x89, 0x2f, 0x2f, 0x54, 0x3f, 0xa9, 0xa4, 0x62, 0xbc, 0x98, 0xa8, 0xa9,
+	0x49, 0x8b, 0xc3, 0x53, 0x3c, 0xfa, 0x14, 0xe6, 0x7b, 0xa4, 0x6f, 0x3a, 0xa4, 0xd7, 0x09, 0x47,
+	0x1e, 0x91, 0x33, 0x25, 0xbe, 0x9c, 0x6d, 0x71, 0xb8, 0x18, 0x4b, 0xa9, 0x05, 0x5a, 0x81, 0x9c,
+	0xe1, 0xfb, 0xc6, 0x48, 0xce, 0x96, 0xf8, 0x72, 0xb1, 0xfa, 0x51, 0xda, 0x7b, 0x9c, 0x47, 0x8b,
+	0xc3, 0x11, 0x0a, 0xad, 0x41, 0xde, 0xf5, 0x42, 0xd3, 0x75, 0x0c, 0x4b, 0x16, 0x6e, 0xb7, 0x48,
+	0x80, 0x0d, 0x11, 0x04, 0xd3, 0xe9, 0xbb, 0xea, 0x8f, 0x19, 0x58, 0xa0, 0xfa, 0x4d, 0x1a, 0xdf,
+	0xa4, 0x4a, 0xf4, 0x10, 0x0a, 0x8e, 0x61, 0x93, 0xc0, 0x33, 0xba, 0x51, 0x81, 0x59, 0x3c, 0x15,
+	0x20, 0x04, 0x02, 0xbd, 0xb0, 0xcc, 0x0b, 0x98, 0x9d, 0x91, 0x0a, 0xf3, 0xe4, 0xd8, 0x23, 0xbe,
+	0x69, 0x13, 0x27, 0x34, 0x2c, 0x96, 0x77, 0x1e, 0xa7, 0x64, 0xa8, 0x02, 0x62, 0x10, 0xfa, 0xc3,
+	0x6e, 0x18, 0xe7, 0x78, 0x3f, 0x9d, 0xe3, 0x3e, 0xd3, 0xb5, 0x38, 0x1c, 0xa3, 0x50, 0x19, 0x04,
+	0xe2, 0x0c, 0x6d, 0x39, 0xc7, 0xd0, 0x28, 0x8d, 0x6e, 0x3a, 0x43, 0xbb, 0xc5, 0x61, 0x86, 0x40,
+	0xcf, 0xa0, 0x60, 0x3a, 0x21, 0xf1, 0xfb, 0x34, 0x5f, 0x91, 0xc1, 0x1f, 0xa4, 0xe1, 0xda, 0x44,
+	0x4d, 0xc9, 0x48, 0xb0, 0x49, 0x0f, 0x9e, 0x82, 0x18, 0x85, 0x47, 0x4f, 0x40, 0xec, 0x9b, 0xc4,
+	0xea, 0x05, 0x72, 0xb6, 0x94, 0x2d, 0x17, 0xab, 0x8b, 0x69, 0x3f, 0x5b, 0x54, 0x87, 0x63, 0x88,
+	0x3a, 0x80, 0x1c, 0x13, 0x24, 0x2d, 0xe1, 0x2f, 0xb5, 0x64, 0x19, 0x84, 0x84, 0xe0, 0x9b, 0x08,
+	0xc1, 0x0c, 0x82, 0x1e, 0x41, 0x91, 0x4d, 0x59, 0x87, 0xf9, 0x65, 0xcd, 0xbb, 0x83, 0x81, 0x89,
+	0x98, 0x7f, 0xf5, 0x19, 0x08, 0xb4, 0x60, 0xb4, 0x0a, 0xe2, 0x1b, 0xc3, 0x1a, 0x92, 0x49, 0x76,
+	0x0f, 0xae, 0x37, 0xe5, 0x25, 0xd5, 0xe3, 0x18, 0xa6, 0x3e, 0x85, 0x42, 0x22, 0x9c, 0x99, 0xe5,
+	0x7d, 0xc8, 0x31, 0x28, 0x4b, 0x33, 0x87, 0xa3, 0x8b, 0xba, 0x0a, 0x85, 0xa4, 0x63, 0x94, 0x5b,
+	0xd3, 0xf6, 0x2c, 0x42, 0x69, 0x24, 0x7e, 0x20, 0xf3, 0xa5, 0x6c, 0x59, 0xc0, 0x29, 0x99, 0xfa,
+	0x33, 0x0f, 0xe2, 0x2e, 0x09, 0x8f, 0xdc, 0x1e, 0xfa, 0x3c, 0xae, 0x3b, 0x7a, 0x18, 0x72, 0x3a,
+	0xc3, 0x08, 0xc3, 0xaa, 0x8f, 0x4a, 0x7f, 0x02, 0x39, 0xd3, 0xf1, 0x86, 0xe1, 0xed, 0x6d, 0x8a,
+	0x30, 0x68, 0x05, 0x44, 0x77, 0x18, 0x52, 0xf4, 0x6d, 0xef, 0x02, 0xc7, 0x20, 0xf5, 0xd7, 0x2c,
+	0xe4, 0x74, 0xe3, 0xd0, 0x22, 0xff, 0x0b, 0x3f, 0xa6, 0x6d, 0xf8, 0xa3, 0xce, 0xf7, 0x64, 0xc4,
+	0x7a, 0x5f, 0xa0, 0xfc, 0x30, 0xd1, 0xd7, 0x64, 0xb4, 0xf4, 0x5b, 0x06, 0x16, 0x35, 0xa7, 0x47,
+	0x8e, 0x5f, 0x18, 0x7e, 0xd8, 0x3c, 0xf6, 0x7c, 0x12, 0x04, 0xf4, 0x21, 0xc9, 0x20, 0x76, 0x5d,
+	0x6b, 0x68, 0x3b, 0x51, 0x64, 0x3a, 0xdc, 0xd1, 0x1d, 0xb5, 0x40, 0xec, 0x3b, 0x5d, 0xc3, 0xb2,
+	0xe2, 0xf8, 0x95, 0x2b, 0xf1, 0x69, 0xda, 0x95, 0x19, 0x2e, 0x2b, 0x5b, 0xce, 0x73, 0xc3, 0xb2,
+	0xa8, 0xa7, 0xc8, 0x7e, 0xe9, 0x3b, 0x10, 0x23, 0x19, 0x5a, 0x80, 0x4c, 0x3f, 0x8a, 0x24, 0xe0,
+	0x4c, 0xdf, 0x41, 0x75, 0x10, 0x0c, 0x7f, 0x10, 0xc8, 0x19, 0x36, 0x2b, 0x2b, 0x1f, 0x1e, 0xa1,
+	0xee, 0x0f, 0x30, 0x33, 0x5d, 0xfa, 0x16, 0x72, 0xec, 0x3a, 0xb3, 0x83, 0x5f, 0x5d, 0x9e, 0x9d,
+	0x62, 0xf5, 0xb3, 0x0f, 0x0c, 0x10, 0x0f, 0x19, 0x7d, 0x7c, 0x21, 0xf1, 0x6d, 0xf5, 0x17, 0x1e,
+	0x0a, 0xbb, 0x6e, 0x6f, 0x68, 0xd1, 0x15, 0x84, 0xbe, 0x80, 0x3c, 0xed, 0x79, 0x8f, 0xf4, 0xa3,
+	0x49, 0x2b, 0x56, 0x1f, 0x5e, 0xa7, 0x66, 0xba, 0xab, 0x70, 0x82, 0x46, 0x15, 0x98, 0xb3, 0xd9,
+	0x78, 0x4d, 0x2a, 0xbe, 0x3f, 0x6b, 0xf6, 0xf0, 0x04, 0x44, 0x9f, 0x7a, 0x48, 0x73, 0xbc, 0xe1,
+	0xa9, 0xb3, 0xfc, 0x71, 0x0c, 0x51, 0xcf, 0x79, 0xc8, 0xb1, 0x5a, 0x6e, 0xe1, 0xb4, 0x76, 0x85,
+	0xd3, 0xa5, 0xab, 0x3b, 0xa8, 0x47, 0x8e, 0xaf, 0xf3, 0xb7, 0x7d, 0x23, 0x7f, 0x2b, 0x29, 0xfe,
+	0x3e, 0x9e, 0xed, 0x6d, 0xca, 0xd5, 0xd6, 0x6d, 0x5c, 0x2d, 0xa7, 0xb9, 0x5a, 0x9c, 0xe1, 0xec,
+	0x2a, 0x2f, 0x8b, 0x50, 0xac, 0x3b, 0xc9, 0x1a, 0xd8, 0x10, 0xde, 0xfe, 0xfe, 0x88, 0x7f, 0x7c,
+	0xc1, 0xc3, 0x9d, 0xd4, 0xd7, 0x0d, 0xe5, 0x41, 0x68, 0xec, 0xed, 0xed, 0x48, 0x1c, 0x3d, 0x69,
+	0x6d, 0x7d, 0x4d, 0xe2, 0x51, 0x01, 0x72, 0x5a, 0x5b, 0x5f, 0xaf, 0x49, 0x19, 0x04, 0x20, 0x1e,
+	0x50, 0x69, 0x55, 0xca, 0x4e, 0xce, 0xeb, 0x35, 0x49, 0xa0, 0xe7, 0xfd, 0x48, 0x9e, 0x9b, 0x9c,
+	0xd7, 0x6b, 0x92, 0x88, 0x8a, 0x30, 0xb7, 0xa5, 0xbd, 0x6a, 0x6e, 0xae, 0x55, 0xa5, 0xb9, 0xe4,
+	0xb2, 0x5e, 0x93, 0xf2, 0x68, 0x1e, 0xf2, 0xfb, 0x13, 0x55, 0x61, 0x7a, 0x5b, 0xaf, 0x49, 0xc0,
+	0x3c, 0xe8, 0x58, 0x6b, 0x6f, 0x4b, 0x45, 0x1a, 0xbc, 0xf1, 0x5a, 0x6f, 0xee, 0x4b, 0xf3, 0xe8,
+	0x2e, 0x14, 0x1b, 0xda, 0x76, 0x47, 0x6b, 0xeb, 0xcd, 0xed, 0x26, 0x96, 0xee, 0x4c, 0x04, 0x9b,
+	0xcd, 0xe7, 0xda, 0x6e, 0x7d, 0x47, 0x5a, 0xa0, 0x6e, 0x36, 0xeb, 0x7a, 0x53, 0xd7, 0x76, 0x9b,
+	0xd2, 0x5d, 0x76, 0x3b, 0xc0, 0x75, 0x5d, 0xdb, 0x6b, 0x4b, 0x12, 0xbd, 0x51, 0x4b, 0xfc, 0xb2,
+	0xbe, 0x23, 0xdd, 0x7b, 0xbc, 0x0c, 0x30, 0xdd, 0x5e, 0x48, 0x84, 0x8c, 0xfe, 0x4a, 0xe2, 0x68,
+	0xb0, 0x6f, 0x0e, 0x9a, 0xf8, 0xb5, 0xc4, 0xd3, 0xf2, 0x0f, 0x74, 0x6d, 0x47, 0xca, 0x6c, 0xb4,
+	0xe1, 0x9e, 0x3f, 0x74, 0x42, 0xd3, 0x26, 0x9d, 0xe4, 0x5b, 0x83, 0x1e, 0x55, 0xa2, 0x9f, 0x8c,
+	0xca, 0xe4, 0x27, 0xa3, 0xb2, 0x4b, 0x82, 0xc0, 0x18, 0x90, 0x3d, 0xf6, 0x45, 0x0e, 0xe4, 0x7f,
+	0x2e, 0xa2, 0xaf, 0xa6, 0x14, 0xdb, 0x4e, 0x5b, 0xdf, 0x48, 0xed, 0x9f, 0xf7, 0x7b, 0xfa, 0xf7,
+	0xe2, 0xda, 0x8a, 0xda, 0xd8, 0xa1, 0x8b, 0x96, 0xce, 0xef, 0x7b, 0xad, 0x2f, 0x2e, 0x66, 0xbe,
+	0x87, 0x78, 0x46, 0x98, 0x93, 0x46, 0xed, 0xe4, 0x54, 0xe1, 0xde, 0x9d, 0x2a, 0xdc, 0xf9, 0xa9,
+	0xc2, 0xff, 0x30, 0x56, 0xf8, 0xb7, 0x63, 0x85, 0xff, 0x63, 0xac, 0xf0, 0x27, 0x63, 0x85, 0xff,
+	0x6b, 0xac, 0xf0, 0x7f, 0x8f, 0x15, 0xee, 0x7c, 0xac, 0xf0, 0x3f, 0x9d, 0x29, 0xdc, 0xc9, 0x99,
+	0xc2, 0xbd, 0x3b, 0x53, 0xb8, 0x43, 0x91, 0x85, 0x5c, 0xfb, 0x2f, 0x00, 0x00, 0xff, 0xff, 0x73,
+	0x07, 0x43, 0x4f, 0x91, 0x09, 0x00, 0x00,
 }
 
 func (x PrimitiveType) String() string {
@@ -806,14 +1374,14 @@ func (this *TypeRef_Primitive) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *TypeRef_ComplexType) Equal(that interface{}) bool {
+func (this *TypeRef_DefinedType) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*TypeRef_ComplexType)
+	that1, ok := that.(*TypeRef_DefinedType)
 	if !ok {
-		that2, ok := that.(TypeRef_ComplexType)
+		that2, ok := that.(TypeRef_DefinedType)
 		if ok {
 			that1 = &that2
 		} else {
@@ -825,7 +1393,7 @@ func (this *TypeRef_ComplexType) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
-	if this.ComplexType != that1.ComplexType {
+	if this.DefinedType != that1.DefinedType {
 		return false
 	}
 	return true
@@ -878,14 +1446,14 @@ func (this *TypeRef_Optional) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *ComplexType) Equal(that interface{}) bool {
+func (this *TypeDefinition) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*ComplexType)
+	that1, ok := that.(*TypeDefinition)
 	if !ok {
-		that2, ok := that.(ComplexType)
+		that2, ok := that.(TypeDefinition)
 		if ok {
 			that1 = &that2
 		} else {
@@ -903,6 +1471,9 @@ func (this *ComplexType) Equal(that interface{}) bool {
 	if this.Name != that1.Name {
 		return false
 	}
+	if this.Experimental != that1.Experimental {
+		return false
+	}
 	if that1.Info == nil {
 		if this.Info != nil {
 			return false
@@ -914,14 +1485,14 @@ func (this *ComplexType) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *ComplexType_Struct) Equal(that interface{}) bool {
+func (this *TypeDefinition_Struct) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*ComplexType_Struct)
+	that1, ok := that.(*TypeDefinition_Struct)
 	if !ok {
-		that2, ok := that.(ComplexType_Struct)
+		that2, ok := that.(TypeDefinition_Struct)
 		if ok {
 			that1 = &that2
 		} else {
@@ -938,14 +1509,14 @@ func (this *ComplexType_Struct) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *ComplexType_Enum) Equal(that interface{}) bool {
+func (this *TypeDefinition_Enum) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*ComplexType_Enum)
+	that1, ok := that.(*TypeDefinition_Enum)
 	if !ok {
-		that2, ok := that.(ComplexType_Enum)
+		that2, ok := that.(TypeDefinition_Enum)
 		if ok {
 			that1 = &that2
 		} else {
@@ -962,14 +1533,14 @@ func (this *ComplexType_Enum) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *ComplexType_Interface) Equal(that interface{}) bool {
+func (this *TypeDefinition_Interface) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*ComplexType_Interface)
+	that1, ok := that.(*TypeDefinition_Interface)
 	if !ok {
-		that2, ok := that.(ComplexType_Interface)
+		that2, ok := that.(TypeDefinition_Interface)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1040,6 +1611,9 @@ func (this *Field) Equal(that interface{}) bool {
 	if !this.Type.Equal(that1.Type) {
 		return false
 	}
+	if this.ProtoField != that1.ProtoField {
+		return false
+	}
 	return true
 }
 func (this *Enum) Equal(that interface{}) bool {
@@ -1071,14 +1645,14 @@ func (this *Enum) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *Value) Equal(that interface{}) bool {
+func (this *EnumValue) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*Value)
+	that1, ok := that.(*EnumValue)
 	if !ok {
-		that2, ok := that.(Value)
+		that2, ok := that.(EnumValue)
 		if ok {
 			that1 = &that2
 		} else {
@@ -1176,7 +1750,358 @@ func (this *Table) Equal(that interface{}) bool {
 	} else if this == nil {
 		return false
 	}
+	if this.Name != that1.Name {
+		return false
+	}
 	if !this.Type.Equal(that1.Type) {
+		return false
+	}
+	if len(this.PrimaryKey) != len(that1.PrimaryKey) {
+		return false
+	}
+	for i := range this.PrimaryKey {
+		if this.PrimaryKey[i] != that1.PrimaryKey[i] {
+			return false
+		}
+	}
+	return true
+}
+func (this *Table_IndexPartExpression) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Table_IndexPartExpression)
+	if !ok {
+		that2, ok := that.(Table_IndexPartExpression)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.Term == nil {
+		if this.Term != nil {
+			return false
+		}
+	} else if this.Term == nil {
+		return false
+	} else if !this.Term.Equal(that1.Term) {
+		return false
+	}
+	return true
+}
+func (this *Table_IndexPartExpression_Column) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Table_IndexPartExpression_Column)
+	if !ok {
+		that2, ok := that.(Table_IndexPartExpression_Column)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Column != that1.Column {
+		return false
+	}
+	return true
+}
+func (this *Table_IndexPartExpression_Fncall) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Table_IndexPartExpression_Fncall)
+	if !ok {
+		that2, ok := that.(Table_IndexPartExpression_Fncall)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Fncall.Equal(that1.Fncall) {
+		return false
+	}
+	return true
+}
+func (this *Table_IndexPartExpression_FnCall) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Table_IndexPartExpression_FnCall)
+	if !ok {
+		that2, ok := that.(Table_IndexPartExpression_FnCall)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Fn != that1.Fn {
+		return false
+	}
+	if len(this.Args) != len(that1.Args) {
+		return false
+	}
+	for i := range this.Args {
+		if !this.Args[i].Equal(that1.Args[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *Table_IndexPartExpression_FnArg) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Table_IndexPartExpression_FnArg)
+	if !ok {
+		that2, ok := that.(Table_IndexPartExpression_FnArg)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if !this.Value.Equal(that1.Value) {
+		return false
+	}
+	return true
+}
+func (this *ModuleDef) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*ModuleDef)
+	if !ok {
+		that2, ok := that.(ModuleDef)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if len(this.Typedefs) != len(that1.Typedefs) {
+		return false
+	}
+	for i := range this.Typedefs {
+		if !this.Typedefs[i].Equal(that1.Typedefs[i]) {
+			return false
+		}
+	}
+	if len(this.Methods) != len(that1.Methods) {
+		return false
+	}
+	for i := range this.Methods {
+		if !this.Methods[i].Equal(that1.Methods[i]) {
+			return false
+		}
+	}
+	if len(this.Tables) != len(that1.Tables) {
+		return false
+	}
+	for i := range this.Tables {
+		if !this.Tables[i].Equal(that1.Tables[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *Index) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Index)
+	if !ok {
+		that2, ok := that.(Index)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if that1.Term == nil {
+		if this.Term != nil {
+			return false
+		}
+	} else if this.Term == nil {
+		return false
+	} else if !this.Term.Equal(that1.Term) {
+		return false
+	}
+	return true
+}
+func (this *Index_Column) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Index_Column)
+	if !ok {
+		that2, ok := that.(Index_Column)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Column != that1.Column {
+		return false
+	}
+	return true
+}
+func (this *Index_Fncall) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Index_Fncall)
+	if !ok {
+		that2, ok := that.(Index_Fncall)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if !this.Fncall.Equal(that1.Fncall) {
+		return false
+	}
+	return true
+}
+func (this *Index_FnCall) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Index_FnCall)
+	if !ok {
+		that2, ok := that.(Index_FnCall)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Fn != that1.Fn {
+		return false
+	}
+	if len(this.Args) != len(that1.Args) {
+		return false
+	}
+	for i := range this.Args {
+		if !this.Args[i].Equal(that1.Args[i]) {
+			return false
+		}
+	}
+	return true
+}
+func (this *Index_FnArg) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*Index_FnArg)
+	if !ok {
+		that2, ok := that.(Index_FnArg)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
+		return false
+	}
+	if this.Name != that1.Name {
+		return false
+	}
+	if !this.Value.Equal(that1.Value) {
+		return false
+	}
+	return true
+}
+func (this *AnInterface) Equal(that interface{}) bool {
+	if that == nil {
+		return this == nil
+	}
+
+	that1, ok := that.(*AnInterface)
+	if !ok {
+		that2, ok := that.(AnInterface)
+		if ok {
+			that1 = &that2
+		} else {
+			return false
+		}
+	}
+	if that1 == nil {
+		return this == nil
+	} else if this == nil {
 		return false
 	}
 	return true
@@ -1201,12 +2126,12 @@ func (this *TypeRef_Primitive) GoString() string {
 		`Primitive:` + fmt.Sprintf("%#v", this.Primitive) + `}`}, ", ")
 	return s
 }
-func (this *TypeRef_ComplexType) GoString() string {
+func (this *TypeRef_DefinedType) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&chain_schema.TypeRef_ComplexType{` +
-		`ComplexType:` + fmt.Sprintf("%#v", this.ComplexType) + `}`}, ", ")
+	s := strings.Join([]string{`&chain_schema.TypeRef_DefinedType{` +
+		`DefinedType:` + fmt.Sprintf("%#v", this.DefinedType) + `}`}, ", ")
 	return s
 }
 func (this *TypeRef_Array) GoString() string {
@@ -1225,41 +2150,42 @@ func (this *TypeRef_Optional) GoString() string {
 		`Optional:` + fmt.Sprintf("%#v", this.Optional) + `}`}, ", ")
 	return s
 }
-func (this *ComplexType) GoString() string {
+func (this *TypeDefinition) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 9)
-	s = append(s, "&chain_schema.ComplexType{")
+	s := make([]string, 0, 10)
+	s = append(s, "&chain_schema.TypeDefinition{")
 	s = append(s, "Namespace: "+fmt.Sprintf("%#v", this.Namespace)+",\n")
 	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	s = append(s, "Experimental: "+fmt.Sprintf("%#v", this.Experimental)+",\n")
 	if this.Info != nil {
 		s = append(s, "Info: "+fmt.Sprintf("%#v", this.Info)+",\n")
 	}
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *ComplexType_Struct) GoString() string {
+func (this *TypeDefinition_Struct) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&chain_schema.ComplexType_Struct{` +
+	s := strings.Join([]string{`&chain_schema.TypeDefinition_Struct{` +
 		`Struct:` + fmt.Sprintf("%#v", this.Struct) + `}`}, ", ")
 	return s
 }
-func (this *ComplexType_Enum) GoString() string {
+func (this *TypeDefinition_Enum) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&chain_schema.ComplexType_Enum{` +
+	s := strings.Join([]string{`&chain_schema.TypeDefinition_Enum{` +
 		`Enum:` + fmt.Sprintf("%#v", this.Enum) + `}`}, ", ")
 	return s
 }
-func (this *ComplexType_Interface) GoString() string {
+func (this *TypeDefinition_Interface) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&chain_schema.ComplexType_Interface{` +
+	s := strings.Join([]string{`&chain_schema.TypeDefinition_Interface{` +
 		`Interface:` + fmt.Sprintf("%#v", this.Interface) + `}`}, ", ")
 	return s
 }
@@ -1279,12 +2205,13 @@ func (this *Field) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 6)
+	s := make([]string, 0, 7)
 	s = append(s, "&chain_schema.Field{")
 	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
 	if this.Type != nil {
 		s = append(s, "Type: "+fmt.Sprintf("%#v", this.Type)+",\n")
 	}
+	s = append(s, "ProtoField: "+fmt.Sprintf("%#v", this.ProtoField)+",\n")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -1300,12 +2227,12 @@ func (this *Enum) GoString() string {
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
-func (this *Value) GoString() string {
+func (this *EnumValue) GoString() string {
 	if this == nil {
 		return "nil"
 	}
 	s := make([]string, 0, 6)
-	s = append(s, "&chain_schema.Value{")
+	s = append(s, "&chain_schema.EnumValue{")
 	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
 	s = append(s, "Value: "+fmt.Sprintf("%#v", this.Value)+",\n")
 	s = append(s, "}")
@@ -1341,11 +2268,148 @@ func (this *Table) GoString() string {
 	if this == nil {
 		return "nil"
 	}
-	s := make([]string, 0, 5)
+	s := make([]string, 0, 7)
 	s = append(s, "&chain_schema.Table{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
 	if this.Type != nil {
 		s = append(s, "Type: "+fmt.Sprintf("%#v", this.Type)+",\n")
 	}
+	s = append(s, "PrimaryKey: "+fmt.Sprintf("%#v", this.PrimaryKey)+",\n")
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *Table_IndexPartExpression) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&chain_schema.Table_IndexPartExpression{")
+	if this.Term != nil {
+		s = append(s, "Term: "+fmt.Sprintf("%#v", this.Term)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *Table_IndexPartExpression_Column) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&chain_schema.Table_IndexPartExpression_Column{` +
+		`Column:` + fmt.Sprintf("%#v", this.Column) + `}`}, ", ")
+	return s
+}
+func (this *Table_IndexPartExpression_Fncall) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&chain_schema.Table_IndexPartExpression_Fncall{` +
+		`Fncall:` + fmt.Sprintf("%#v", this.Fncall) + `}`}, ", ")
+	return s
+}
+func (this *Table_IndexPartExpression_FnCall) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&chain_schema.Table_IndexPartExpression_FnCall{")
+	s = append(s, "Fn: "+fmt.Sprintf("%#v", this.Fn)+",\n")
+	if this.Args != nil {
+		s = append(s, "Args: "+fmt.Sprintf("%#v", this.Args)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *Table_IndexPartExpression_FnArg) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&chain_schema.Table_IndexPartExpression_FnArg{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	if this.Value != nil {
+		s = append(s, "Value: "+fmt.Sprintf("%#v", this.Value)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *ModuleDef) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 7)
+	s = append(s, "&chain_schema.ModuleDef{")
+	if this.Typedefs != nil {
+		s = append(s, "Typedefs: "+fmt.Sprintf("%#v", this.Typedefs)+",\n")
+	}
+	if this.Methods != nil {
+		s = append(s, "Methods: "+fmt.Sprintf("%#v", this.Methods)+",\n")
+	}
+	if this.Tables != nil {
+		s = append(s, "Tables: "+fmt.Sprintf("%#v", this.Tables)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *Index) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&chain_schema.Index{")
+	if this.Term != nil {
+		s = append(s, "Term: "+fmt.Sprintf("%#v", this.Term)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *Index_Column) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&chain_schema.Index_Column{` +
+		`Column:` + fmt.Sprintf("%#v", this.Column) + `}`}, ", ")
+	return s
+}
+func (this *Index_Fncall) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&chain_schema.Index_Fncall{` +
+		`Fncall:` + fmt.Sprintf("%#v", this.Fncall) + `}`}, ", ")
+	return s
+}
+func (this *Index_FnCall) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&chain_schema.Index_FnCall{")
+	s = append(s, "Fn: "+fmt.Sprintf("%#v", this.Fn)+",\n")
+	if this.Args != nil {
+		s = append(s, "Args: "+fmt.Sprintf("%#v", this.Args)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *Index_FnArg) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 6)
+	s = append(s, "&chain_schema.Index_FnArg{")
+	s = append(s, "Name: "+fmt.Sprintf("%#v", this.Name)+",\n")
+	if this.Value != nil {
+		s = append(s, "Value: "+fmt.Sprintf("%#v", this.Value)+",\n")
+	}
+	s = append(s, "}")
+	return strings.Join(s, "")
+}
+func (this *AnInterface) GoString() string {
+	if this == nil {
+		return "nil"
+	}
+	s := make([]string, 0, 4)
+	s = append(s, "&chain_schema.AnInterface{")
 	s = append(s, "}")
 	return strings.Join(s, "")
 }
@@ -1401,14 +2465,14 @@ func (m *TypeRef_Primitive) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	dAtA[i] = 0x8
 	return len(dAtA) - i, nil
 }
-func (m *TypeRef_ComplexType) MarshalTo(dAtA []byte) (int, error) {
+func (m *TypeRef_DefinedType) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *TypeRef_ComplexType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *TypeRef_DefinedType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
-	i = encodeVarintChainSchema(dAtA, i, uint64(m.ComplexType))
+	i = encodeVarintChainSchema(dAtA, i, uint64(m.DefinedType))
 	i--
 	dAtA[i] = 0x10
 	return len(dAtA) - i, nil
@@ -1455,7 +2519,7 @@ func (m *TypeRef_Optional) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	return len(dAtA) - i, nil
 }
-func (m *ComplexType) Marshal() (dAtA []byte, err error) {
+func (m *TypeDefinition) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1465,12 +2529,12 @@ func (m *ComplexType) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ComplexType) MarshalTo(dAtA []byte) (int, error) {
+func (m *TypeDefinition) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ComplexType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *TypeDefinition) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1483,6 +2547,16 @@ func (m *ComplexType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				return 0, err
 			}
 		}
+	}
+	if m.Experimental {
+		i--
+		if m.Experimental {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x18
 	}
 	if len(m.Name) > 0 {
 		i -= len(m.Name)
@@ -1499,12 +2573,12 @@ func (m *ComplexType) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *ComplexType_Struct) MarshalTo(dAtA []byte) (int, error) {
+func (m *TypeDefinition_Struct) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ComplexType_Struct) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *TypeDefinition_Struct) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.Struct != nil {
 		{
@@ -1516,16 +2590,16 @@ func (m *ComplexType_Struct) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintChainSchema(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x1a
+		dAtA[i] = 0x22
 	}
 	return len(dAtA) - i, nil
 }
-func (m *ComplexType_Enum) MarshalTo(dAtA []byte) (int, error) {
+func (m *TypeDefinition_Enum) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ComplexType_Enum) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *TypeDefinition_Enum) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.Enum != nil {
 		{
@@ -1537,16 +2611,16 @@ func (m *ComplexType_Enum) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintChainSchema(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x22
+		dAtA[i] = 0x2a
 	}
 	return len(dAtA) - i, nil
 }
-func (m *ComplexType_Interface) MarshalTo(dAtA []byte) (int, error) {
+func (m *TypeDefinition_Interface) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ComplexType_Interface) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *TypeDefinition_Interface) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.Interface != nil {
 		{
@@ -1558,7 +2632,7 @@ func (m *ComplexType_Interface) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintChainSchema(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x2a
+		dAtA[i] = 0x32
 	}
 	return len(dAtA) - i, nil
 }
@@ -1619,6 +2693,11 @@ func (m *Field) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.ProtoField != 0 {
+		i = encodeVarintChainSchema(dAtA, i, uint64(m.ProtoField))
+		i--
+		dAtA[i] = 0x18
+	}
 	if m.Type != nil {
 		{
 			size, err := m.Type.MarshalToSizedBuffer(dAtA[:i])
@@ -1678,7 +2757,7 @@ func (m *Enum) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *Value) Marshal() (dAtA []byte, err error) {
+func (m *EnumValue) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1688,18 +2767,18 @@ func (m *Value) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *Value) MarshalTo(dAtA []byte) (int, error) {
+func (m *EnumValue) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *Value) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *EnumValue) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
 	if m.Value != 0 {
-		i = encodeVarintChainSchema(dAtA, i, uint64((uint32(m.Value)<<1)^uint32((m.Value>>31))))
+		i = encodeVarintChainSchema(dAtA, i, uint64(m.Value))
 		i--
 		dAtA[i] = 0x10
 	}
@@ -1826,6 +2905,15 @@ func (m *Table) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.PrimaryKey) > 0 {
+		for iNdEx := len(m.PrimaryKey) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.PrimaryKey[iNdEx])
+			copy(dAtA[i:], m.PrimaryKey[iNdEx])
+			i = encodeVarintChainSchema(dAtA, i, uint64(len(m.PrimaryKey[iNdEx])))
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
 	if m.Type != nil {
 		{
 			size, err := m.Type.MarshalToSizedBuffer(dAtA[:i])
@@ -1836,8 +2924,405 @@ func (m *Table) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintChainSchema(dAtA, i, uint64(size))
 		}
 		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintChainSchema(dAtA, i, uint64(len(m.Name)))
+		i--
 		dAtA[i] = 0xa
 	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Table_IndexPartExpression) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Table_IndexPartExpression) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Table_IndexPartExpression) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Term != nil {
+		{
+			size := m.Term.Size()
+			i -= size
+			if _, err := m.Term.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Table_IndexPartExpression_Column) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Table_IndexPartExpression_Column) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i -= len(m.Column)
+	copy(dAtA[i:], m.Column)
+	i = encodeVarintChainSchema(dAtA, i, uint64(len(m.Column)))
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+func (m *Table_IndexPartExpression_Fncall) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Table_IndexPartExpression_Fncall) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Fncall != nil {
+		{
+			size, err := m.Fncall.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintChainSchema(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *Table_IndexPartExpression_FnCall) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Table_IndexPartExpression_FnCall) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Table_IndexPartExpression_FnCall) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Args) > 0 {
+		for iNdEx := len(m.Args) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Args[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintChainSchema(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if m.Fn != 0 {
+		i = encodeVarintChainSchema(dAtA, i, uint64(m.Fn))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Table_IndexPartExpression_FnArg) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Table_IndexPartExpression_FnArg) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Table_IndexPartExpression_FnArg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Value != nil {
+		{
+			size, err := m.Value.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintChainSchema(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintChainSchema(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *ModuleDef) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ModuleDef) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ModuleDef) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Tables) > 0 {
+		for iNdEx := len(m.Tables) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Tables[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintChainSchema(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.Methods) > 0 {
+		for iNdEx := len(m.Methods) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Methods[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintChainSchema(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Typedefs) > 0 {
+		for iNdEx := len(m.Typedefs) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Typedefs[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintChainSchema(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Index) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Index) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Index) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Term != nil {
+		{
+			size := m.Term.Size()
+			i -= size
+			if _, err := m.Term.MarshalTo(dAtA[i:]); err != nil {
+				return 0, err
+			}
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Index_Column) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Index_Column) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	i -= len(m.Column)
+	copy(dAtA[i:], m.Column)
+	i = encodeVarintChainSchema(dAtA, i, uint64(len(m.Column)))
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+func (m *Index_Fncall) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Index_Fncall) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	if m.Fncall != nil {
+		{
+			size, err := m.Fncall.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintChainSchema(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	return len(dAtA) - i, nil
+}
+func (m *Index_FnCall) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Index_FnCall) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Index_FnCall) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Args) > 0 {
+		for iNdEx := len(m.Args) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Args[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintChainSchema(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if m.Fn != 0 {
+		i = encodeVarintChainSchema(dAtA, i, uint64(m.Fn))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Index_FnArg) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Index_FnArg) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Index_FnArg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Value != nil {
+		{
+			size, err := m.Value.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintChainSchema(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintChainSchema(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *AnInterface) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *AnInterface) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *AnInterface) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
 	return len(dAtA) - i, nil
 }
 
@@ -1873,13 +3358,13 @@ func (m *TypeRef_Primitive) Size() (n int) {
 	n += 1 + sovChainSchema(uint64(m.Primitive))
 	return n
 }
-func (m *TypeRef_ComplexType) Size() (n int) {
+func (m *TypeRef_DefinedType) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	n += 1 + sovChainSchema(uint64(m.ComplexType))
+	n += 1 + sovChainSchema(uint64(m.DefinedType))
 	return n
 }
 func (m *TypeRef_Array) Size() (n int) {
@@ -1906,7 +3391,7 @@ func (m *TypeRef_Optional) Size() (n int) {
 	}
 	return n
 }
-func (m *ComplexType) Size() (n int) {
+func (m *TypeDefinition) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1919,13 +3404,16 @@ func (m *ComplexType) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovChainSchema(uint64(l))
 	}
+	if m.Experimental {
+		n += 2
+	}
 	if m.Info != nil {
 		n += m.Info.Size()
 	}
 	return n
 }
 
-func (m *ComplexType_Struct) Size() (n int) {
+func (m *TypeDefinition_Struct) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1937,7 +3425,7 @@ func (m *ComplexType_Struct) Size() (n int) {
 	}
 	return n
 }
-func (m *ComplexType_Enum) Size() (n int) {
+func (m *TypeDefinition_Enum) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1949,7 +3437,7 @@ func (m *ComplexType_Enum) Size() (n int) {
 	}
 	return n
 }
-func (m *ComplexType_Interface) Size() (n int) {
+func (m *TypeDefinition_Interface) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1990,6 +3478,9 @@ func (m *Field) Size() (n int) {
 		l = m.Type.Size()
 		n += 1 + l + sovChainSchema(uint64(l))
 	}
+	if m.ProtoField != 0 {
+		n += 1 + sovChainSchema(uint64(m.ProtoField))
+	}
 	return n
 }
 
@@ -2008,7 +3499,7 @@ func (m *Enum) Size() (n int) {
 	return n
 }
 
-func (m *Value) Size() (n int) {
+func (m *EnumValue) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2019,7 +3510,7 @@ func (m *Value) Size() (n int) {
 		n += 1 + l + sovChainSchema(uint64(l))
 	}
 	if m.Value != 0 {
-		n += 1 + sozChainSchema(uint64(m.Value))
+		n += 1 + sovChainSchema(uint64(m.Value))
 	}
 	return n
 }
@@ -2066,10 +3557,194 @@ func (m *Table) Size() (n int) {
 	}
 	var l int
 	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovChainSchema(uint64(l))
+	}
 	if m.Type != nil {
 		l = m.Type.Size()
 		n += 1 + l + sovChainSchema(uint64(l))
 	}
+	if len(m.PrimaryKey) > 0 {
+		for _, s := range m.PrimaryKey {
+			l = len(s)
+			n += 1 + l + sovChainSchema(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *Table_IndexPartExpression) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Term != nil {
+		n += m.Term.Size()
+	}
+	return n
+}
+
+func (m *Table_IndexPartExpression_Column) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Column)
+	n += 1 + l + sovChainSchema(uint64(l))
+	return n
+}
+func (m *Table_IndexPartExpression_Fncall) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Fncall != nil {
+		l = m.Fncall.Size()
+		n += 1 + l + sovChainSchema(uint64(l))
+	}
+	return n
+}
+func (m *Table_IndexPartExpression_FnCall) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Fn != 0 {
+		n += 1 + sovChainSchema(uint64(m.Fn))
+	}
+	if len(m.Args) > 0 {
+		for _, e := range m.Args {
+			l = e.Size()
+			n += 1 + l + sovChainSchema(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *Table_IndexPartExpression_FnArg) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovChainSchema(uint64(l))
+	}
+	if m.Value != nil {
+		l = m.Value.Size()
+		n += 1 + l + sovChainSchema(uint64(l))
+	}
+	return n
+}
+
+func (m *ModuleDef) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Typedefs) > 0 {
+		for _, e := range m.Typedefs {
+			l = e.Size()
+			n += 1 + l + sovChainSchema(uint64(l))
+		}
+	}
+	if len(m.Methods) > 0 {
+		for _, e := range m.Methods {
+			l = e.Size()
+			n += 1 + l + sovChainSchema(uint64(l))
+		}
+	}
+	if len(m.Tables) > 0 {
+		for _, e := range m.Tables {
+			l = e.Size()
+			n += 1 + l + sovChainSchema(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *Index) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Term != nil {
+		n += m.Term.Size()
+	}
+	return n
+}
+
+func (m *Index_Column) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Column)
+	n += 1 + l + sovChainSchema(uint64(l))
+	return n
+}
+func (m *Index_Fncall) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Fncall != nil {
+		l = m.Fncall.Size()
+		n += 1 + l + sovChainSchema(uint64(l))
+	}
+	return n
+}
+func (m *Index_FnCall) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Fn != 0 {
+		n += 1 + sovChainSchema(uint64(m.Fn))
+	}
+	if len(m.Args) > 0 {
+		for _, e := range m.Args {
+			l = e.Size()
+			n += 1 + l + sovChainSchema(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *Index_FnArg) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovChainSchema(uint64(l))
+	}
+	if m.Value != nil {
+		l = m.Value.Size()
+		n += 1 + l + sovChainSchema(uint64(l))
+	}
+	return n
+}
+
+func (m *AnInterface) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
 	return n
 }
 
@@ -2099,12 +3774,12 @@ func (this *TypeRef_Primitive) String() string {
 	}, "")
 	return s
 }
-func (this *TypeRef_ComplexType) String() string {
+func (this *TypeRef_DefinedType) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&TypeRef_ComplexType{`,
-		`ComplexType:` + fmt.Sprintf("%v", this.ComplexType) + `,`,
+	s := strings.Join([]string{`&TypeRef_DefinedType{`,
+		`DefinedType:` + fmt.Sprintf("%v", this.DefinedType) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2129,43 +3804,44 @@ func (this *TypeRef_Optional) String() string {
 	}, "")
 	return s
 }
-func (this *ComplexType) String() string {
+func (this *TypeDefinition) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&ComplexType{`,
+	s := strings.Join([]string{`&TypeDefinition{`,
 		`Namespace:` + fmt.Sprintf("%v", this.Namespace) + `,`,
 		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Experimental:` + fmt.Sprintf("%v", this.Experimental) + `,`,
 		`Info:` + fmt.Sprintf("%v", this.Info) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *ComplexType_Struct) String() string {
+func (this *TypeDefinition_Struct) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&ComplexType_Struct{`,
+	s := strings.Join([]string{`&TypeDefinition_Struct{`,
 		`Struct:` + strings.Replace(fmt.Sprintf("%v", this.Struct), "Struct", "Struct", 1) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *ComplexType_Enum) String() string {
+func (this *TypeDefinition_Enum) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&ComplexType_Enum{`,
+	s := strings.Join([]string{`&TypeDefinition_Enum{`,
 		`Enum:` + strings.Replace(fmt.Sprintf("%v", this.Enum), "Enum", "Enum", 1) + `,`,
 		`}`,
 	}, "")
 	return s
 }
-func (this *ComplexType_Interface) String() string {
+func (this *TypeDefinition_Interface) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&ComplexType_Interface{`,
+	s := strings.Join([]string{`&TypeDefinition_Interface{`,
 		`Interface:` + strings.Replace(fmt.Sprintf("%v", this.Interface), "Interface", "Interface", 1) + `,`,
 		`}`,
 	}, "")
@@ -2193,6 +3869,7 @@ func (this *Field) String() string {
 	s := strings.Join([]string{`&Field{`,
 		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
 		`Type:` + strings.Replace(this.Type.String(), "TypeRef", "TypeRef", 1) + `,`,
+		`ProtoField:` + fmt.Sprintf("%v", this.ProtoField) + `,`,
 		`}`,
 	}, "")
 	return s
@@ -2201,9 +3878,9 @@ func (this *Enum) String() string {
 	if this == nil {
 		return "nil"
 	}
-	repeatedStringForValues := "[]*Value{"
+	repeatedStringForValues := "[]*EnumValue{"
 	for _, f := range this.Values {
-		repeatedStringForValues += strings.Replace(f.String(), "Value", "Value", 1) + ","
+		repeatedStringForValues += strings.Replace(f.String(), "EnumValue", "EnumValue", 1) + ","
 	}
 	repeatedStringForValues += "}"
 	s := strings.Join([]string{`&Enum{`,
@@ -2212,11 +3889,11 @@ func (this *Enum) String() string {
 	}, "")
 	return s
 }
-func (this *Value) String() string {
+func (this *EnumValue) String() string {
 	if this == nil {
 		return "nil"
 	}
-	s := strings.Join([]string{`&Value{`,
+	s := strings.Join([]string{`&EnumValue{`,
 		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
 		`Value:` + fmt.Sprintf("%v", this.Value) + `,`,
 		`}`,
@@ -2250,7 +3927,159 @@ func (this *Table) String() string {
 		return "nil"
 	}
 	s := strings.Join([]string{`&Table{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
 		`Type:` + strings.Replace(this.Type.String(), "TypeRef", "TypeRef", 1) + `,`,
+		`PrimaryKey:` + fmt.Sprintf("%v", this.PrimaryKey) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Table_IndexPartExpression) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Table_IndexPartExpression{`,
+		`Term:` + fmt.Sprintf("%v", this.Term) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Table_IndexPartExpression_Column) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Table_IndexPartExpression_Column{`,
+		`Column:` + fmt.Sprintf("%v", this.Column) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Table_IndexPartExpression_Fncall) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Table_IndexPartExpression_Fncall{`,
+		`Fncall:` + strings.Replace(fmt.Sprintf("%v", this.Fncall), "Table_IndexPartExpression_FnCall", "Table_IndexPartExpression_FnCall", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Table_IndexPartExpression_FnCall) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForArgs := "[]*Table_IndexPartExpression_FnArg{"
+	for _, f := range this.Args {
+		repeatedStringForArgs += strings.Replace(fmt.Sprintf("%v", f), "Table_IndexPartExpression_FnArg", "Table_IndexPartExpression_FnArg", 1) + ","
+	}
+	repeatedStringForArgs += "}"
+	s := strings.Join([]string{`&Table_IndexPartExpression_FnCall{`,
+		`Fn:` + fmt.Sprintf("%v", this.Fn) + `,`,
+		`Args:` + repeatedStringForArgs + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Table_IndexPartExpression_FnArg) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Table_IndexPartExpression_FnArg{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Value:` + strings.Replace(fmt.Sprintf("%v", this.Value), "Table_IndexPartExpression", "Table_IndexPartExpression", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *ModuleDef) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForTypedefs := "[]*TypeDefinition{"
+	for _, f := range this.Typedefs {
+		repeatedStringForTypedefs += strings.Replace(f.String(), "TypeDefinition", "TypeDefinition", 1) + ","
+	}
+	repeatedStringForTypedefs += "}"
+	repeatedStringForMethods := "[]*Method{"
+	for _, f := range this.Methods {
+		repeatedStringForMethods += strings.Replace(f.String(), "Method", "Method", 1) + ","
+	}
+	repeatedStringForMethods += "}"
+	repeatedStringForTables := "[]*Table{"
+	for _, f := range this.Tables {
+		repeatedStringForTables += strings.Replace(f.String(), "Table", "Table", 1) + ","
+	}
+	repeatedStringForTables += "}"
+	s := strings.Join([]string{`&ModuleDef{`,
+		`Typedefs:` + repeatedStringForTypedefs + `,`,
+		`Methods:` + repeatedStringForMethods + `,`,
+		`Tables:` + repeatedStringForTables + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Index) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Index{`,
+		`Term:` + fmt.Sprintf("%v", this.Term) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Index_Column) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Index_Column{`,
+		`Column:` + fmt.Sprintf("%v", this.Column) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Index_Fncall) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Index_Fncall{`,
+		`Fncall:` + strings.Replace(fmt.Sprintf("%v", this.Fncall), "Index_FnCall", "Index_FnCall", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Index_FnCall) String() string {
+	if this == nil {
+		return "nil"
+	}
+	repeatedStringForArgs := "[]*Index_FnArg{"
+	for _, f := range this.Args {
+		repeatedStringForArgs += strings.Replace(fmt.Sprintf("%v", f), "Index_FnArg", "Index_FnArg", 1) + ","
+	}
+	repeatedStringForArgs += "}"
+	s := strings.Join([]string{`&Index_FnCall{`,
+		`Fn:` + fmt.Sprintf("%v", this.Fn) + `,`,
+		`Args:` + repeatedStringForArgs + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *Index_FnArg) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&Index_FnArg{`,
+		`Name:` + fmt.Sprintf("%v", this.Name) + `,`,
+		`Value:` + strings.Replace(this.Value.String(), "Index", "Index", 1) + `,`,
+		`}`,
+	}, "")
+	return s
+}
+func (this *AnInterface) String() string {
+	if this == nil {
+		return "nil"
+	}
+	s := strings.Join([]string{`&AnInterface{`,
 		`}`,
 	}, "")
 	return s
@@ -2314,9 +4143,9 @@ func (m *TypeRef) Unmarshal(dAtA []byte) error {
 			m.Info = &TypeRef_Primitive{v}
 		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ComplexType", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field DefinedType", wireType)
 			}
-			var v uint64
+			var v int64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowChainSchema
@@ -2326,12 +4155,12 @@ func (m *TypeRef) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= uint64(b&0x7F) << shift
+				v |= int64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			m.Info = &TypeRef_ComplexType{v}
+			m.Info = &TypeRef_DefinedType{v}
 		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Array", wireType)
@@ -2426,7 +4255,7 @@ func (m *TypeRef) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ComplexType) Unmarshal(dAtA []byte) error {
+func (m *TypeDefinition) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2449,10 +4278,10 @@ func (m *ComplexType) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ComplexType: wiretype end group for non-group")
+			return fmt.Errorf("proto: TypeDefinition: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ComplexType: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: TypeDefinition: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2469,7 +4298,7 @@ func (m *ComplexType) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Namespace |= uint64(b&0x7F) << shift
+				m.Namespace |= int64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2507,6 +4336,26 @@ func (m *ComplexType) Unmarshal(dAtA []byte) error {
 			m.Name = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Experimental", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.Experimental = bool(v != 0)
+		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Struct", wireType)
 			}
@@ -2539,9 +4388,9 @@ func (m *ComplexType) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Info = &ComplexType_Struct{v}
+			m.Info = &TypeDefinition_Struct{v}
 			iNdEx = postIndex
-		case 4:
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Enum", wireType)
 			}
@@ -2574,9 +4423,9 @@ func (m *ComplexType) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Info = &ComplexType_Enum{v}
+			m.Info = &TypeDefinition_Enum{v}
 			iNdEx = postIndex
-		case 5:
+		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Interface", wireType)
 			}
@@ -2609,7 +4458,7 @@ func (m *ComplexType) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Info = &ComplexType_Interface{v}
+			m.Info = &TypeDefinition_Interface{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
@@ -2819,6 +4668,25 @@ func (m *Field) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProtoField", wireType)
+			}
+			m.ProtoField = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ProtoField |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipChainSchema(dAtA[iNdEx:])
@@ -2901,7 +4769,7 @@ func (m *Enum) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Values = append(m.Values, &Value{})
+			m.Values = append(m.Values, &EnumValue{})
 			if err := m.Values[len(m.Values)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -2930,7 +4798,7 @@ func (m *Enum) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *Value) Unmarshal(dAtA []byte) error {
+func (m *EnumValue) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2953,10 +4821,10 @@ func (m *Value) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: Value: wiretype end group for non-group")
+			return fmt.Errorf("proto: EnumValue: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: Value: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: EnumValue: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2995,7 +4863,7 @@ func (m *Value) Unmarshal(dAtA []byte) error {
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
 			}
-			var v int32
+			m.Value = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowChainSchema
@@ -3005,13 +4873,11 @@ func (m *Value) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				v |= int32(b&0x7F) << shift
+				m.Value |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			v = int32((uint32(v) >> 1) ^ uint32(((v&1)<<31)>>31))
-			m.Value = v
 		default:
 			iNdEx = preIndex
 			skippy, err := skipChainSchema(dAtA[iNdEx:])
@@ -3340,6 +5206,38 @@ func (m *Table) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Type", wireType)
 			}
 			var msglen int
@@ -3374,6 +5272,940 @@ func (m *Table) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field PrimaryKey", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.PrimaryKey = append(m.PrimaryKey, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipChainSchema(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Table_IndexPartExpression) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowChainSchema
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: IndexPartExpression: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: IndexPartExpression: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Column", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Term = &Table_IndexPartExpression_Column{string(dAtA[iNdEx:postIndex])}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Fncall", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &Table_IndexPartExpression_FnCall{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Term = &Table_IndexPartExpression_Fncall{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipChainSchema(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Table_IndexPartExpression_FnCall) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowChainSchema
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: FnCall: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: FnCall: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Fn", wireType)
+			}
+			m.Fn = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Fn |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Args", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Args = append(m.Args, &Table_IndexPartExpression_FnArg{})
+			if err := m.Args[len(m.Args)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipChainSchema(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Table_IndexPartExpression_FnArg) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowChainSchema
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: FnArg: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: FnArg: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Value == nil {
+				m.Value = &Table_IndexPartExpression{}
+			}
+			if err := m.Value.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipChainSchema(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ModuleDef) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowChainSchema
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ModuleDef: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ModuleDef: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Typedefs", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Typedefs = append(m.Typedefs, &TypeDefinition{})
+			if err := m.Typedefs[len(m.Typedefs)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Methods", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Methods = append(m.Methods, &Method{})
+			if err := m.Methods[len(m.Methods)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Tables", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Tables = append(m.Tables, &Table{})
+			if err := m.Tables[len(m.Tables)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipChainSchema(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Index) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowChainSchema
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Index: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Index: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Column", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Term = &Index_Column{string(dAtA[iNdEx:postIndex])}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Fncall", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			v := &Index_FnCall{}
+			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			m.Term = &Index_Fncall{v}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipChainSchema(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Index_FnCall) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowChainSchema
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: FnCall: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: FnCall: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Fn", wireType)
+			}
+			m.Fn = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Fn |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Args", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Args = append(m.Args, &Index_FnArg{})
+			if err := m.Args[len(m.Args)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipChainSchema(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Index_FnArg) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowChainSchema
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: FnArg: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: FnArg: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowChainSchema
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Value == nil {
+				m.Value = &Index{}
+			}
+			if err := m.Value.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipChainSchema(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthChainSchema
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *AnInterface) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowChainSchema
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: AnInterface: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: AnInterface: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
 		default:
 			iNdEx = preIndex
 			skippy, err := skipChainSchema(dAtA[iNdEx:])
